@@ -1,0 +1,18 @@
+.container {
+  display: inline-block;
+  position: relative;
+  width: 300px;
+  height: 300px;
+  border: 1px solid black;
+  margin-right: 4px;
+}
+
+.node {
+  width: 0;
+  height: 0;
+  position: absolute;
+  border-left: 0px solid transparent;
+  border-right: 0px solid transparent;
+  border-bottom: 0px solid gray;
+  opacity: 0.5;
+}
