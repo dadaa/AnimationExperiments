@@ -14,13 +14,13 @@ function appendAnimationContainer() {
   const container = document.createElement("div");
   container.classList.add("container");
   document.querySelector("main").appendChild(container);
+  container.addEventListener("click", function(e) {
+    replay(e.target);
+  });
   return container;
 }
 
-window.addEventListener("DOMContentLoaded", function() {
-  const baseAnimationContainer = appendAnimationContainer();
-  baseAnimationContainer.classList.add("base");
-
+function createAnimation(container, trunkConfig, nodeConfig, leafConfig) {
   for (let i = 0; i < TRUNK_COUNT; i++) {
     const trunkElement = document.createElement("div");
     let bottom = i * TRUNK_HEIGHT / 2;
@@ -28,7 +28,8 @@ window.addEventListener("DOMContentLoaded", function() {
     let border = TRUNK_WIDTH / 2 - i;
     let endLeft = - bottom * angle * Math.PI / 180 * 0.5;
     let beginLeft = endLeft - border;
-    let delay = 1500 * i - 1500 * i * 0.6;
+    let delay = trunkConfig.duration * i
+                - trunkConfig.duration * i * trunkConfig.delayRatio;
     trunkElement.classList.add("node");
     trunkElement.style.bottom = `${bottom}px`;
     trunkElement.style.transform = `rotate(${angle}deg)`;
@@ -39,9 +40,10 @@ window.addEventListener("DOMContentLoaded", function() {
         borderLeftWidth: ["0px", `${border}px`],
         borderRightWidth: ["0px", `${border}px`],
         left: [`calc(20% - ${beginLeft}px)`, `calc(20% - ${endLeft}px)`] },
-      { fill: "both", duration: 1500, delay: delay }
+      { fill: "both", duration: trunkConfig.duration,
+        delay: delay, easing: trunkConfig.easing }
     );
-    baseAnimationContainer.appendChild(trunkElement);
+    container.appendChild(trunkElement);
   }
 
   for (let i = 0; i < NODE_COUNT; i++) {
@@ -51,7 +53,8 @@ window.addEventListener("DOMContentLoaded", function() {
     let border = NODE_WIDTH / 2 - i;
     let endLeft = - bottom * angle * Math.PI / 180 + i * 8;
     let beginLeft = endLeft - border;
-    let delay = 3000 + 1000 * i - 1000 * i * 0.3;
+    let delay = nodeConfig.startDelay + nodeConfig.duration * i
+                - nodeConfig.duration * i * nodeConfig.delayRatio;
     nodeElement.classList.add("node");
     nodeElement.style.bottom = `${bottom}px`;
     nodeElement.style.transform = `rotate(${angle}deg)`;
@@ -61,20 +64,21 @@ window.addEventListener("DOMContentLoaded", function() {
         borderLeftWidth: ["0px", `${border}px`],
         borderRightWidth: ["0px", `${border}px`],
         left: [`calc(0% - ${beginLeft}px)`, `calc(0% - ${endLeft}px)`] },
-      { fill: "both", duration: 1000, delay: delay }
+      { fill: "both", duration: nodeConfig.duration,
+        delay: delay, easing: nodeConfig.easing }
     );
-    baseAnimationContainer.appendChild(nodeElement);
+    container.appendChild(nodeElement);
   }
 
   for (let i = 0; i < LEAF_COUNT; i++) {
     const leafElement = document.createElement("div");
     let border = LEAF_WIDTH / 2;
-    let delay = 5000 + 1000 * i - 1000 * i * 0.8;
-
-    let angle = 40 + i * 7;
-    let bottom = i * NODE_HEIGHT / 2 + 100;
-    let endLeft = - bottom * angle * Math.PI / 180 + i * 8;
-    let beginLeft = endLeft - border;
+    let delay = leafConfig.startDelay + leafConfig.duration * i
+                - leafConfig.duration * i * leafConfig.delayRatio;
+    let angle;
+    let bottom;
+    let endLeft;
+    let beginLeft;
     switch (i) {
     case 0:
       angle = 30;
@@ -116,8 +120,89 @@ window.addEventListener("DOMContentLoaded", function() {
         borderLeftWidth: ["0px", `${border}px`],
         borderRightWidth: ["0px", `${border}px`],
         left: [endLeft, beginLeft] },
-      { fill: "both", duration: 1000, delay: delay }
+      { fill: "both", duration: leafConfig.duration,
+        delay: delay, easing: leafConfig.easing }
     );
-    baseAnimationContainer.appendChild(leafElement);
+    container.appendChild(leafElement);
   }
+}
+
+function getRandomEasing() {
+  return ["linear", "ease-in", "ease-out", "ease-in-out"][Math.floor(Math.random()*4)];
+}
+
+function createBaseAnimation() {
+  const baseAnimationContainer = appendAnimationContainer();
+  baseAnimationContainer.classList.add("base");
+  const baseTrunkConfig = {
+    duration: 1500,
+    delayRatio: 0.5,
+    easing: "linear"
+  };
+  const baseNodeConfig = {
+    startDelay: 1000,
+    duration: 1000,
+    delayRatio: 0.3,
+    easing: "linear"
+  };
+  const baseLeafConfig = {
+    startDelay: 2000,
+    duration: 1000,
+    delayRatio: 0.8,
+    easing: "linear"
+  };
+  createAnimation(baseAnimationContainer, baseTrunkConfig,
+                  baseNodeConfig, baseLeafConfig);
+}
+
+function fork() {
+  const previousAnimations = document.querySelectorAll(".forked");
+  Array.prototype.forEach.call(previousAnimations, function(element) {
+    element.parentNode.removeChild(element);
+  });
+
+  for (let i = 0; i < EXPERIMENT_COUNT; i++) {
+    const container = appendAnimationContainer();
+    container.classList.add("forked");
+
+    const trunkConfig = {
+      duration: 1500 * Math.random(),
+      delayRatio: Math.random(),
+      easing: getRandomEasing()
+    };
+
+    const nodeConfig = {
+      startDelay: 1500 * Math.random(),
+      duration: 1500 * Math.random(),
+      delayRatio: Math.random(),
+      easing: getRandomEasing()
+    };
+
+    const leafConfig = {
+      startDelay: 1500 * Math.random(),
+      duration: 1500 * Math.random(),
+      delayRatio: Math.random(),
+      easing: getRandomEasing()
+    };
+
+    createAnimation(container, trunkConfig, nodeConfig, leafConfig);
+  }
+}
+
+function replay(target) {
+  const animations = target.getAnimations({ subtree: true });
+  animations.forEach(function(animation) {
+    animation.currentTime = 0;
+  });
+}
+
+function replayAll() {
+  replay(document.querySelector("main"));
+}
+
+window.addEventListener("DOMContentLoaded", function() {
+  createBaseAnimation();
+  document.getElementById("fork-button").addEventListener("click", fork);
+  document.getElementById("replay-all-button").addEventListener("click",
+                                                                replayAll);
 });
