@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset=utf-8>
+    <title>heart</title>
+    <style>
+    @font-face {
+	    font-family: 'firasans';
+	    src: url("font/FiraSans-UltraLight.otf") format('opentype');
+	  }
+
+    html, body, main {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #animation {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      height: 100%
+    }
+
+    #animation>div {
+      flex: auto;
+    }
+
+    .info {
+      position: absolute;
+      font-family: "firasans";
+      font-size: 35px;
+    }
+
+    #keyframes {
+      top: 10%;
+      left: 5%;
+    }
+
+    #effect {
+      bottom: 10%;
+      right: 5%;
+      text-align: right;
+    }
+
+    .info>div>div {
+      display: inline-block;
+    }
+
+    #keyframes>div>div:first-child {
+      min-width: 8em;
+    }
+
+    #effect>div>div:last-child {
+      min-width: 5em;
+    }
+
+    #keyframes label {
+      background-color: red;
+      color: white;
+    }
+
+    #effect label {
+      color: gray;
+    }
+
+    @keyframes anim {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(2);
+      }
+    }
+
+    #heart {
+      mask-image: url("heart.svg");
+      mask-repeat: no-repeat;
+      mask-size: contain;
+      background-color: #9E1E1E;
+      position: relative;
+      top: calc(50% - 150px);
+      width: 300px;
+      height: 300px;
+      margin: auto;
+      animation: anim 1s infinite;
+    }
+
+    </style>
+  </head>
+  <body role="document">
+    <main>
+      <section id="animation">
+        <div>
+          <div id="heart"></div>
+        </div>
+      </section>
+
+      <section id="effect" class="info">
+        <div id="duration">
+          <div><label>duration</label></div>
+          <div><label class="value"></label></div>
+        </div>
+        <div id="delay">
+          <div><label>delay</label></div>
+          <div><label class="value">500</label></div>
+        </div>
+        <div id="iterations">
+          <div><label>iterations</label></div>
+          <div><label class="value">Infinity</label></div>
+        </div>
+        <div id="direction">
+          <div><label>direction</label></div>
+          <div><label class="value">normal</label></div>
+        </div>
+        <div id="fill">
+          <div><label>fill</label></div>
+          <div><label class="value">none</label></div>
+        </div>
+        <div id="easing">
+          <div><label>easing</label></div>
+          <div><label class="value">linear</label></div>
+        </div>
+      </section>
+
+      <section id="keyframes" class="info">
+      </section>
+    </main>
+    <script>
+    /*
+    heart.animate(
+      [
+        {
+          offset: 0,
+          transform: "scale(1)",
+          backgroundColor: "red",
+          opacity: 0
+        },
+        {
+          offset: 1,
+          transform: "scale(2)",
+          backgroundColor: "blue",
+          opacity: 1
+        }
+      ],
+      {
+        duration: 1000,
+        iterations: Infinity,
+      });
+    */
+    let previousProperties = [];
+    setInterval(() => {
+      const animations = heart.getAnimations();
+      if (animations.length === 0) {
+        return;
+      }
+
+      const animation = animations[0];
+      document.querySelector("#duration .value").textContent =
+        animation.effect.timing.duration;
+      document.querySelector("#delay .value").textContent =
+        animation.effect.timing.delay;
+      document.querySelector("#iterations .value").textContent =
+        animation.effect.timing.iterations;
+      document.querySelector("#direction .value").textContent =
+        animation.effect.timing.direction;
+      document.querySelector("#fill .value").textContent =
+        animation.effect.timing.fill;
+      document.querySelector("#easing .value").textContent =
+        animation.effect.timing.easing;
+
+      const keyframe = animation.effect.getKeyframes()[0];
+      const currentProperties = [];
+      for (let property in keyframe) {
+        if (property === "offset" ||
+            property === "computedOffset" ||
+            property === "easing") {
+          continue;
+        }
+        currentProperties.push(property);
+      }
+
+      if (previousProperties != currentProperties) {
+        const keyframesElement = document.querySelector("#keyframes");
+        keyframesElement.innerHTML = "";
+        const durationElement = document.querySelector("#duration");
+        currentProperties.forEach(currentProperty => {
+          const container = document.importNode(durationElement, true);
+          container.id = currentProperty;
+          container.querySelector("label").textContent = currentProperty;
+          keyframesElement.appendChild(container);
+        });
+      }
+
+      const computedStyle = getComputedStyle(heart);
+      currentProperties.forEach(currentProperty => {
+        document.querySelector(`#${ currentProperty } .value`).textContent =
+          computedStyle[currentProperty];
+      });
+    }, 100);
+    </script>
+  </body>
+</html>

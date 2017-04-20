@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset=utf-8>
+    <title>heart</title>
+    <style>
+    @font-face {
+	    font-family: 'firasans';
+	    src: url("font/FiraSans-UltraLight.otf") format('opentype');
+	  }
+
+    html, body, main {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #animation {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      height: 100%
+    }
+
+    #animation>div {
+      flex: auto;
+    }
+
+    .info {
+      position: absolute;
+      font-family: "firasans";
+      font-size: 35px;
+    }
+
+    #keyframes {
+      top: 10%;
+      left: 5%;
+    }
+
+    #effect {
+      bottom: 10%;
+      right: 5%;
+      text-align: right;
+    }
+
+    .info>div>div {
+      display: inline-block;
+    }
+
+    #keyframes>div>div:first-child {
+      min-width: 8em;
+    }
+
+    #effect>div>div:last-child {
+      min-width: 5em;
+    }
+
+    #keyframes label {
+      background-color: red;
+      color: white;
+    }
+
+    #effect label {
+      background-color: red;
+      color: white;
+    }
+
+    @keyframes anim {
+      from {
+        transform: scale(1);
+        background-color: #9E1E1E;
+      }
+      to {
+        transform: scale(2);
+        background-color: #E57373;
+      }
+    }
+
+    #heart {
+      mask-image: url("heart.svg");
+      mask-repeat: no-repeat;
+      mask-size: contain;
+      background-color: #9E1E1E;
+      position: relative;
+      top: calc(50% - 50px);
+      width: 100px;
+      height: 100px;
+      margin: auto;
+      animation: anim 1s infinite alternate;
+    }
+
+    </style>
+  </head>
+  <body role="document">
+    <main>
+      <section id="animation">
+        <div>
+          <div id="heart"></div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
